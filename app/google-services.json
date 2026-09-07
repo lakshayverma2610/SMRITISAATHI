@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "769380103595",
+    "project_id": "smritisaathi-f03bd",
+    "storage_bucket": "smritisaathi-f03bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769380103595:android:00f26016a03b1ce10d0eee",
+        "android_client_info": {
+          "package_name": "com.nercare.cogcare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769380103595-0pp50kafido121hg3k21h5nnpm9jjkuk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nercare.cogcare",
+            "certificate_hash": "4f809743d904136e38542e3156c82eec03719115"
+          }
+        },
+        {
+          "client_id": "769380103595-a7upcgr22k3a8qdbi274btnrkubqcg6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcXiFlrguQ2PyOJiqh8vhjGaYqj-WoiEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769380103595-a7upcgr22k3a8qdbi274btnrkubqcg6c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

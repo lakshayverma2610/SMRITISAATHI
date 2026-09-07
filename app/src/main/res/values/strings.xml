@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SmritiSaathi</string>
+    <string name="app_tagline">Cognitive Care Companion</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step1_title">Who are we caring for?</string>
+    <string name="patient_name_hint">Patient\'s Full Name</string>
+    <string name="patient_age_hint">Age (years)</string>
+    <string name="language_step_title">Choose Language</string>
+    <string name="stage_step_title">Cognitive Stage</string>
+    <string name="btn_next">Next →</string>
+    <string name="btn_back">← Back</string>
+    <string name="btn_get_started">Get Started 🌟</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Good Morning,</string>
+    <string name="greeting_afternoon">Good Afternoon,</string>
+    <string name="greeting_evening">Good Evening,</string>
+    <string name="home_games">Play Games</string>
+    <string name="home_reminders">Reminders</string>
+    <string name="home_progress">My Progress</string>
+    <string name="today_reminders">Today\'s Reminders</string>
+    <string name="view_all">View All →</string>
+
+    <!-- Games -->
+    <string name="game_hub_title">SmritiSaathi Game Hub</string>
+    <string name="game_hub_subtitle">15 tailored cognitive exercises for mind &amp; joy</string>
+    <string name="ai_recommendation">AI Recommendation</string>
+    <string name="play_recommended">▶ Play Recommended Game</string>
+    <string name="memory_card_title">Memory Cards</string>
+    <string name="memory_card_desc">Match pairs of culturally familiar images</string>
+    <string name="sequence_title">Sequence Recall</string>
+    <string name="sequence_desc">Remember and repeat the pattern sequence</string>
+    <string name="pattern_title">Pattern Matching</string>
+    <string name="pattern_desc">Find the matching pattern from choices</string>
+    <string name="word_assoc_title">Word Association</string>
+    <string name="word_assoc_desc">Connect words that belong together</string>
+    <string name="routine_title">Daily Routine Quiz</string>
+    <string name="routine_desc">Recall your daily activities</string>
+
+    <!-- Game UI -->
+    <string name="score">Score</string>
+    <string name="level">Level</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="pairs_found">pairs found</string>
+    <string name="watch_sequence">👀 Watch the sequence…</string>
+    <string name="your_turn">🎯 Your turn! Repeat the sequence</string>
+    <string name="correct_sequence">✅ Correct! Next round…</string>
+    <string name="wrong_sequence">❌ Oops! Wrong sequence</string>
+    <string name="well_done">Well Done!</string>
+    <string name="game_complete_title">🎉</string>
+    <string name="need_hint">💡 Need a hint?</string>
+    <string name="choose_answer">Choose the answer:</string>
+    <string name="what_comes_next">What comes next?</string>
+
+    <!-- Reminders -->
+    <string name="reminders_title">⏰ Reminders</string>
+    <string name="reminders_subtitle">Your daily schedule</string>
+    <string name="add_reminder">Add Reminder</string>
+    <string name="reminder_type">Reminder Type</string>
+    <string name="reminder_title_hint">Reminder Title</string>
+    <string name="medicine_name_hint">Medicine Name</string>
+    <string name="dosage_hint">Dosage (e.g., 1 tablet)</string>
+    <string name="reminder_time">Time</string>
+    <string name="repeat_days">Repeat Days</string>
+    <string name="save_reminder">💾 Save Reminder</string>
+    <string name="no_reminders">No reminders yet</string>
+    <string name="add_first_reminder">Add your first reminder below</string>
+    <string name="every_day">Every day</string>
+
+    <!-- Caregiver Dashboard -->
+    <string name="dashboard_title">📊 Caregiver Dashboard</string>
+    <string name="overall_score">Overall Score</string>
+    <string name="this_week">This Week</string>
+    <string name="sessions_unit">sessions</string>
+    <string name="weekly_trend">Weekly Trend</string>
+    <string name="game_performance">Game Performance</string>
+    <string name="recent_sessions">Recent Sessions</string>
+    <string name="no_sessions">No sessions recorded yet</string>
+    <string name="trend_improving">Improving</string>
+    <string name="trend_stable">Stable</string>
+    <string name="trend_declining">Declining</string>
+
+    <!-- Notification channels -->
+    <string name="channel_medicine_name">Medicine Reminders</string>
+    <string name="channel_medicine_desc">Reminders to take medicines on time</string>
+    <string name="channel_hydration_name">Hydration Reminders</string>
+    <string name="channel_appointment_name">Appointment Reminders</string>
+    <string name="channel_activity_name">Daily Activity Reminders</string>
+    <string name="channel_caregiver_name">Caregiver Alerts</string>
+</resources>

@@ -1,0 +1,103 @@
+package com.nercare.cogcare.data.local.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.nercare.cogcare.domain.model.CognitiveStage
+import com.nercare.cogcare.domain.model.Patient
+
+@Entity(tableName = "patients")
+data class PatientEntity(
+    @PrimaryKey val id: String,
+    val username: String,
+    val name: String,
+    val preferredName: String,
+    val age: Int,
+    val dateOfBirth: String,
+    val gender: String,
+    val language: String,
+    val city: String,
+    val diagnosisStage: String,
+    val diagnosisDetails: String,
+    val medicalConditions: String,
+    val medications: String,
+    val independenceBaseline: String,
+    val caregiverId: String,
+    val caregiverRelationship: String,
+    val caregiverContact: String,
+    val emergencyContact: String,
+    val hobbies: String,
+    val favoriteMusic: String,
+    val favoriteFoods: String,
+    val favoriteActivities: String,
+    val profession: String,
+    val importantPeople: String,
+    val importantPlaces: String,
+    val importantEvents: String,
+    val profileImageUrl: String,
+    val createdAt: Long,
+    val lastActiveAt: Long
+) {
+    fun toDomain() = Patient(
+        id = id,
+        username = username,
+        name = name,
+        preferredName = preferredName,
+        age = age,
+        dateOfBirth = dateOfBirth,
+        gender = gender,
+        language = language,
+        city = city,
+        diagnosisStage = CognitiveStage.valueOf(diagnosisStage),
+        diagnosisDetails = diagnosisDetails,
+        medicalConditions = medicalConditions,
+        medications = medications,
+        independenceBaseline = independenceBaseline,
+        caregiverId = caregiverId,
+        caregiverRelationship = caregiverRelationship,
+        caregiverContact = caregiverContact,
+        emergencyContact = emergencyContact,
+        hobbies = hobbies,
+        favoriteMusic = favoriteMusic,
+        favoriteFoods = favoriteFoods,
+        favoriteActivities = favoriteActivities,
+        profession = profession,
+        importantPeople = importantPeople,
+        importantPlaces = importantPlaces,
+        importantEvents = importantEvents,
+        profileImageUrl = profileImageUrl,
+        createdAt = createdAt,
+        lastActiveAt = lastActiveAt
+    )
+}
+
+fun Patient.toEntity() = PatientEntity(
+    id = id,
+    username = username,
+    name = name,
+    preferredName = preferredName,
+    age = age,
+    dateOfBirth = dateOfBirth,
+    gender = gender,
+    language = language,
+    city = city,
+    diagnosisStage = diagnosisStage.name,
+    diagnosisDetails = diagnosisDetails,
+    medicalConditions = medicalConditions,
+    medications = medications,
+    independenceBaseline = independenceBaseline,
+    caregiverId = caregiverId,
+    caregiverRelationship = caregiverRelationship,
+    caregiverContact = caregiverContact,
+    emergencyContact = emergencyContact,
+    hobbies = hobbies,
+    favoriteMusic = favoriteMusic,
+    favoriteFoods = favoriteFoods,
+    favoriteActivities = favoriteActivities,
+    profession = profession,
+    importantPeople = importantPeople,
+    importantPlaces = importantPlaces,
+    importantEvents = importantEvents,
+    profileImageUrl = profileImageUrl,
+    createdAt = createdAt,
+    lastActiveAt = lastActiveAt
+)

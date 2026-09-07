@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Brain / Heart Care Icon -->
+    <path
+        android:fillColor="#E8700A"
+        android:pathData="M54,28c-14.36,0 -26,11.64 -26,26c0,11.08 6.94,20.54 16.74,24.23L44,82l10,-4l10,4l-0.74,-3.77C73.06,74.54 80,65.08 80,54c0,-14.36 -11.64,-26 -26,-26zm-8,30c-3.31,0 -6,-2.69 -6,-6s2.69,-6 6,-6s6,2.69 6,6s-2.69,6 -6,6zm16,0c-3.31,0 -6,-2.69 -6,-6s2.69,-6 6,-6s6,2.69 6,6s-2.69,6 -6,6z"/>
+</vector>

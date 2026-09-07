@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bengali translations (বাংলা) -->
+<resources>
+    <string name="app_name">NER কগকেয়ার</string>
+    <string name="app_tagline">প্রতিটি বয়স্কের জন্য মানসিক স্বাস্থ্যসেবা</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step1_title">আমরা কার যত্ন নিচ্ছি?</string>
+    <string name="patient_name_hint">রোগীর পুরো নাম</string>
+    <string name="patient_age_hint">বয়স (বছর)</string>
+    <string name="language_step_title">ভাষা বেছে নিন</string>
+    <string name="stage_step_title">জ্ঞানীয় পর্যায়</string>
+    <string name="btn_next">পরবর্তী →</string>
+    <string name="btn_back">← পূর্ববর্তী</string>
+    <string name="btn_get_started">শুরু করুন 🌟</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">শুভ সকাল,</string>
+    <string name="greeting_afternoon">শুভ বিকেল,</string>
+    <string name="greeting_evening">শুভ সন্ধ্যা,</string>
+    <string name="home_games">গেম খেলুন</string>
+    <string name="home_reminders">স্মরণিকা</string>
+    <string name="home_progress">আমার অগ্রগতি</string>
+    <string name="today_reminders">আজকের স্মরণিকা</string>
+
+    <!-- Games -->
+    <string name="game_hub_title">জ্ঞানীয় খেলা</string>
+    <string name="game_hub_subtitle">মনকে সক্রিয় রাখতে একটি খেলা বেছে নিন!</string>
+    <string name="memory_card_title">স্মৃতি কার্ড</string>
+    <string name="sequence_title">ক্রম স্মরণ</string>
+    <string name="pattern_title">প্যাটার্ন মিলান</string>
+    <string name="word_assoc_title">শব্দ সংযোগ</string>
+    <string name="routine_title">দৈনন্দিন রুটিন</string>
+    <string name="well_done">খুব ভালো!</string>
+    <string name="need_hint">💡 সাহায্য দরকার?</string>
+
+    <!-- Reminders -->
+    <string name="reminders_title">⏰ স্মরণিকা</string>
+    <string name="reminders_subtitle">আপনার দৈনন্দিন সময়সূচি</string>
+    <string name="add_reminder">স্মরণিকা যোগ করুন</string>
+    <string name="save_reminder">💾 সংরক্ষণ করুন</string>
+    <string name="no_reminders">এখনো কোনো স্মরণিকা নেই</string>
+    <string name="every_day">প্রতিদিন</string>
+
+    <!-- Caregiver Dashboard -->
+    <string name="dashboard_title">📊 পরিচর্যাকারী ড্যাশবোর্ড</string>
+    <string name="overall_score">সামগ্রিক স্কোর</string>
+    <string name="this_week">এই সপ্তাহ</string>
+    <string name="weekly_trend">সাপ্তাহিক প্রবণতা</string>
+    <string name="game_performance">খেলার পারফরম্যান্স</string>
+    <string name="recent_sessions">সাম্প্রতিক অধিবেশন</string>
+    <string name="trend_improving">উন্নতি হচ্ছে</string>
+    <string name="trend_stable">স্থিতিশীল</string>
+    <string name="trend_declining">অবনতি হচ্ছে</string>
+</resources>
