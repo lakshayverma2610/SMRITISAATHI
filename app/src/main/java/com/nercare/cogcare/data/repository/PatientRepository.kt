@@ -3,6 +3,10 @@ package com.nercare.cogcare.data.repository
 import com.nercare.cogcare.data.local.dao.PatientDao
 import android.util.Log
 import com.nercare.cogcare.data.local.dao.PatientCredentialDao
+import com.nercare.cogcare.data.local.dao.LifeMemoryNodeDao
+import com.nercare.cogcare.data.local.dao.FamilyMemberDao
+import com.nercare.cogcare.data.local.dao.GameSessionDao
+import com.nercare.cogcare.data.local.dao.ReminderDao
 import com.nercare.cogcare.data.local.entities.PatientCredentialEntity
 import com.nercare.cogcare.data.local.entities.toEntity
 import com.nercare.cogcare.data.remote.FirebaseService
@@ -22,6 +26,10 @@ import javax.inject.Singleton
 class PatientRepository @Inject constructor(
     private val patientDao: PatientDao,
     private val credentialDao: PatientCredentialDao,
+    private val memoryNodeDao: LifeMemoryNodeDao,
+    private val familyMemberDao: FamilyMemberDao,
+    private val gameSessionDao: GameSessionDao,
+    private val reminderDao: ReminderDao,
     private val firebaseService: FirebaseService
 ) {
     fun getAllPatients(): Flow<List<Patient>> =
@@ -57,8 +65,22 @@ class PatientRepository @Inject constructor(
     }
 
     suspend fun savePatientWithCredentials(patient: Patient): Pair<Patient, String> {
-        val saved = savePatient(patient)
-        val password = generatePassword()
+        return savePatientWithCredentials(patient, generatePassword())
+    }
+
+    suspend fun savePatientWithCredentials(patient: Patient, password: String): Pair<Patient, String> {
+        val normalizedUsername = patient.username.trim().lowercase()
+        require(normalizedUsername.matches(Regex("[a-z0-9._-]{3,30}"))) {
+            "Username must be 3–30 characters and use only letters, numbers, dot, underscore or hyphen"
+        }
+        require(password.length >= 6) { "Patient password must contain at least 6 characters" }
+        if (patientDao.getPatientByUsername(normalizedUsername) != null) error("Username is already taken")
+        val saved = patient.copy(
+            id = patient.id.ifBlank { generatePatientId() },
+            username = normalizedUsername
+        )
+        firebaseService.createPatient(saved)
+        patientDao.upsertPatient(saved.toEntity())
         val salt = ByteArray(16).also(SecureRandom()::nextBytes)
         credentialDao.upsert(
             PatientCredentialEntity(
@@ -77,6 +99,13 @@ class PatientRepository @Inject constructor(
             Log.e("PatientRepository", "Failed to sync social profile to remote: ${e.message}")
         }
         return saved to password
+    }
+
+    suspend fun isUsernameAvailable(username: String): Boolean {
+        val normalized = username.trim().lowercase()
+        if (!normalized.matches(Regex("[a-z0-9._-]{3,30}"))) return false
+        if (patientDao.getPatientByUsername(normalized) != null) return false
+        return firebaseService.isUsernameAvailable(normalized)
     }
 
     suspend fun resetPatientPassword(patientId: String): String {
@@ -124,6 +153,12 @@ class PatientRepository @Inject constructor(
     }
 
     suspend fun deletePatient(patient: Patient) {
+        firebaseService.deletePatient(patient)
+        credentialDao.deleteForPatient(patient.id)
+        memoryNodeDao.deleteAllForPatient(patient.id)
+        familyMemberDao.deleteAllForPatient(patient.id)
+        gameSessionDao.deleteAllForPatient(patient.id)
+        reminderDao.deleteAllForPatient(patient.id)
         patientDao.deletePatient(patient.toEntity())
     }
 

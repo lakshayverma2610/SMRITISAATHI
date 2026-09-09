@@ -32,4 +32,7 @@ interface ReminderDao {
 
     @Query("DELETE FROM reminders WHERE id = :id")
     suspend fun deleteReminderById(id: String)
+
+    @Query("DELETE FROM reminders WHERE patientId = :patientId")
+    suspend fun deleteAllForPatient(patientId: String)
 }

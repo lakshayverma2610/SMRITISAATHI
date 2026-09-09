@@ -13,4 +13,7 @@ interface PatientCredentialDao {
 
     @Query("SELECT * FROM patient_credentials WHERE patientId = :patientId LIMIT 1")
     suspend fun get(patientId: String): PatientCredentialEntity?
+
+    @Query("DELETE FROM patient_credentials WHERE patientId = :patientId")
+    suspend fun deleteForPatient(patientId: String)
 }

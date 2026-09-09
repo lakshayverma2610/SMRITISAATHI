@@ -6,9 +6,12 @@ import com.nercare.cogcare.ai.AdaptiveDifficultyEngine
 import com.nercare.cogcare.ai.CognitiveScoreCalculator
 import com.nercare.cogcare.data.repository.GameRepository
 import com.nercare.cogcare.data.repository.PatientRepository
+import com.nercare.cogcare.data.repository.LifeStoryRepository
 import com.nercare.cogcare.data.repository.ReminderRepository
 import com.nercare.cogcare.domain.model.Patient
 import com.nercare.cogcare.domain.model.Reminder
+import com.nercare.cogcare.domain.model.LifeMemoryNode
+import com.nercare.cogcare.domain.model.MemorySource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,6 +24,7 @@ data class HomeUiState(
     val nextReminder: Reminder? = null,
     val todayReminders: List<String> = emptyList(),
     val encouragementMessage: String? = null,
+    val caregiverMemories: List<LifeMemoryNode> = emptyList(),
     val isLoading: Boolean = true
 )
 
@@ -29,6 +33,7 @@ class HomeViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
     private val gameRepository: GameRepository,
     private val reminderRepository: ReminderRepository,
+    private val lifeStoryRepository: LifeStoryRepository,
     private val scoreCalculator: CognitiveScoreCalculator,
     private val difficultyEngine: AdaptiveDifficultyEngine
 ) : ViewModel() {
@@ -38,11 +43,12 @@ class HomeViewModel @Inject constructor(
 
     fun loadPatient(patientId: String) {
         viewModelScope.launch {
-            patientRepository.observePatient(patientId)
-                .combine(reminderRepository.getActiveReminders(patientId)) { patient, reminders ->
-                    Pair(patient, reminders)
-                }
-                .collect { (patient, reminders) ->
+            combine(
+                patientRepository.observePatient(patientId),
+                reminderRepository.getActiveReminders(patientId),
+                lifeStoryRepository.observeAllMemoryNodes(patientId)
+            ) { patient, reminders, memories -> Triple(patient, reminders, memories) }
+                .collect { (patient, reminders, memories) ->
                     if (patient != null) {
                         patientRepository.updateLastActive(patientId)
 
@@ -87,6 +93,7 @@ class HomeViewModel @Inject constructor(
                                 nextReminder = next,
                                 todayReminders = todayReminderTitles,
                                 encouragementMessage = recommendation.encouragementMessage,
+                                caregiverMemories = memories.filter { it.source == MemorySource.CAREGIVER_ENTRY }.take(3),
                                 isLoading = false
                             )
                         }

@@ -10,6 +10,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.nercare.cogcare.BuildConfig
 import com.nercare.cogcare.data.repository.CaregiverAuthRepository
+import com.nercare.cogcare.data.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nercare.cogcare.presentation.theme.*
@@ -31,14 +33,20 @@ import com.nercare.cogcare.presentation.theme.*
 data class CaregiverAuthState(val loading: Boolean = false, val error: String? = null, val signedIn: Boolean = false)
 
 @HiltViewModel
-class CaregiverAuthViewModel @Inject constructor(private val repository: CaregiverAuthRepository) : ViewModel() {
+class CaregiverAuthViewModel @Inject constructor(
+    private val repository: CaregiverAuthRepository,
+    private val sessionRepository: SessionRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(CaregiverAuthState(signedIn = repository.currentCaregiverId != null))
     val state = _state.asStateFlow()
 
     fun submit(email: String, password: String, create: Boolean) = viewModelScope.launch {
         _state.value = CaregiverAuthState(loading = true)
         val result = if (create) repository.createAccount(email, password) else repository.signIn(email, password)
-        _state.value = result.fold({ CaregiverAuthState(signedIn = true) }, { CaregiverAuthState(error = it.localizedMessage ?: "Authentication failed") })
+        _state.value = result.fold({
+            sessionRepository.saveCaregiverSession()
+            CaregiverAuthState(signedIn = true)
+        }, { CaregiverAuthState(error = it.localizedMessage ?: "Authentication failed") })
     }
 
     fun google(context: Context) = viewModelScope.launch {
@@ -57,7 +65,10 @@ class CaregiverAuthViewModel @Inject constructor(private val repository: Caregiv
             require(credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
             GoogleIdTokenCredential.createFrom(credential.data).idToken
         }.fold(
-            onSuccess = { token -> repository.signInWithGoogle(token).fold({ _state.value = CaregiverAuthState(signedIn = true) }, { _state.value = CaregiverAuthState(error = it.localizedMessage) }) },
+            onSuccess = { token -> repository.signInWithGoogle(token).fold({
+                sessionRepository.saveCaregiverSession()
+                _state.value = CaregiverAuthState(signedIn = true)
+            }, { _state.value = CaregiverAuthState(error = it.localizedMessage) }) },
             onFailure = { _state.value = CaregiverAuthState(error = it.localizedMessage ?: "Google sign-in failed") }
         )
     }
@@ -77,7 +88,7 @@ fun CaregiverAuthScreen(onSuccess: () -> Unit, onBack: () -> Unit, viewModel: Ca
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(email, { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(Modifier.height(12.dp))
-        OutlinedTextField(password, { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(password, { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth(), singleLine = true, visualTransformation = PasswordVisualTransformation())
         state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
         Spacer(Modifier.height(20.dp))
         Button(onClick = { viewModel.submit(email, password, create) }, enabled = email.isNotBlank() && password.length >= 6 && !state.loading, modifier = Modifier.fillMaxWidth().height(54.dp)) {

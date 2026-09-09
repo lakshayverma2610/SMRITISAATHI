@@ -179,6 +179,32 @@ fun HomeScreen(
             }
         }
 
+        if (uiState.caregiverMemories.isNotEmpty()) {
+            Text(
+                "Memories shared by your caregiver",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryGreen,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { onNavigateToProfile() }.padding(bottom = 20.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SecondaryGreen)
+            ) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    uiState.caregiverMemories.forEach { memory ->
+                        Column {
+                            Text(memory.questionPrompt.ifBlank { memory.nodeKey.replace('_', ' ').replaceFirstChar { it.uppercase() } }, style = MaterialTheme.typography.labelMedium, color = TextSecondaryMuted)
+                            Text(memory.value, style = MaterialTheme.typography.bodyLarge, color = TextPrimaryDark)
+                        }
+                    }
+                    Text("View all memories", color = PrimaryGreen, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
         // Dedicated Family & Loved Ones Card
         Card(
             modifier = Modifier

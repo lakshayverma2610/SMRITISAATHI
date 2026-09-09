@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
 import com.nercare.cogcare.presentation.caregiver.CaregiverDashboardScreen
+import com.nercare.cogcare.presentation.caregiver.EditPatientScreen
 import com.nercare.cogcare.presentation.caregiver.CaregiverPinScreen
 import com.nercare.cogcare.presentation.caregiver.setup.LifeStorySetupScreen
 import com.nercare.cogcare.presentation.voice.CompanionVoiceScreen
@@ -297,7 +298,20 @@ fun AppNavigation(
                 onBack = { navController.popBackStack() },
                 onNavigateToLifeStorySetup = {
                     navController.navigate(Screen.LifeStorySetup.createRoute(patientId))
-                }
+                },
+                onEditPatient = { navController.navigate(Screen.EditPatient.createRoute(patientId)) }
+            )
+        }
+
+        composable(
+            route = Screen.EditPatient.route,
+            arguments = listOf(navArgument("patientId") { type = NavType.StringType })
+        ) { backStack ->
+            val patientId = backStack.arguments?.getString("patientId") ?: ""
+            EditPatientScreen(
+                patientId = patientId,
+                onSaved = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
             )
         }
 

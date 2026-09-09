@@ -38,4 +38,7 @@ interface GameSessionDao {
 
     @Query("SELECT * FROM game_sessions WHERE patientId = :patientId AND gameType = :gameType ORDER BY completedAt DESC LIMIT 5")
     suspend fun getRecentSessionsByGame(patientId: String, gameType: String): List<GameSessionEntity>
+
+    @Query("DELETE FROM game_sessions WHERE patientId = :patientId")
+    suspend fun deleteAllForPatient(patientId: String)
 }

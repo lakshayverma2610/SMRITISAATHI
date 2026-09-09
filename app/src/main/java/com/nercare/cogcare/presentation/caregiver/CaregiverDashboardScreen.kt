@@ -28,6 +28,7 @@ fun CaregiverDashboardScreen(
     patientId: String,
     onBack: () -> Unit,
     onNavigateToLifeStorySetup: () -> Unit = {},
+    onEditPatient: () -> Unit = {},
     viewModel: CaregiverViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -171,13 +172,16 @@ fun CaregiverDashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("Patient Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            OutlinedButton(
-                                onClick = { viewModel.resetPatientPassword(patientId) },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Reset Password", style = MaterialTheme.typography.labelSmall)
+                            Row {
+                                IconButton(onClick = onEditPatient) { Icon(Icons.Default.Edit, contentDescription = "Edit patient", tint = PrimaryGreen) }
+                                OutlinedButton(
+                                    onClick = { viewModel.resetPatientPassword(patientId) },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Reset Password", style = MaterialTheme.typography.labelSmall)
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -187,6 +191,23 @@ fun CaregiverDashboardScreen(
                         if (uiState.city.isNotBlank()) Text("City: ${uiState.city}", style = MaterialTheme.typography.bodyMedium)
                         Text("Language: ${uiState.language}", style = MaterialTheme.typography.bodyMedium)
                         Text("Stage: ${uiState.diagnosisStage}", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(12.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = onEditPatient, modifier = Modifier.weight(1f)) {
+                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(17.dp))
+                                Spacer(Modifier.width(5.dp))
+                                Text("Edit patient")
+                            }
+                            OutlinedButton(
+                                onClick = { showDeleteDialog = true },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(17.dp))
+                                Spacer(Modifier.width(5.dp))
+                                Text("Delete patient")
+                            }
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))

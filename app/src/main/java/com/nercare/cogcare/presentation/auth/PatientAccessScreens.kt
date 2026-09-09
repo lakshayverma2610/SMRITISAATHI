@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nercare.cogcare.data.repository.CaregiverAuthRepository
 import com.nercare.cogcare.data.repository.PatientRepository
+import com.nercare.cogcare.data.repository.SessionRepository
 import com.nercare.cogcare.domain.model.Patient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -18,16 +19,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nercare.cogcare.presentation.theme.*
 
 @HiltViewModel
-class PatientSelectionViewModel @Inject constructor(private val auth: CaregiverAuthRepository, repository: PatientRepository) : ViewModel() {
+class PatientSelectionViewModel @Inject constructor(private val auth: CaregiverAuthRepository, private val session: SessionRepository, repository: PatientRepository) : ViewModel() {
     val caregiverId = auth.currentCaregiverId.orEmpty()
     val patients = (if (caregiverId.isBlank()) flowOf(emptyList()) else repository.getPatientsForCaregiver(caregiverId))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-    fun signOut() = auth.signOut()
+    fun signOut() {
+        auth.signOut()
+        viewModelScope.launch { session.clear() }
+    }
     init { if (caregiverId.isNotBlank()) viewModelScope.launch { repository.refreshPatientsForCaregiver(caregiverId) } }
 }
 
@@ -57,13 +62,16 @@ fun PatientSelectionScreen(onPatient: (String) -> Unit, onAdd: (String) -> Unit,
 
 data class PatientLoginState(val loading: Boolean = false, val error: String? = null, val patient: Patient? = null)
 @HiltViewModel
-class PatientLoginViewModel @Inject constructor(private val repository: PatientRepository) : ViewModel() {
+class PatientLoginViewModel @Inject constructor(private val repository: PatientRepository, private val session: SessionRepository) : ViewModel() {
     private val _state = MutableStateFlow(PatientLoginState())
     val state = _state.asStateFlow()
     fun login(username: String, password: String) = viewModelScope.launch {
         _state.value = PatientLoginState(loading = true)
         val patient = repository.authenticatePatient(username, password)
-        _state.value = if (patient == null) PatientLoginState(error = "Username or password is incorrect") else PatientLoginState(patient = patient)
+        _state.value = if (patient == null) PatientLoginState(error = "Username or password is incorrect") else {
+            session.savePatientSession(patient.id)
+            PatientLoginState(patient = patient)
+        }
     }
 }
 
@@ -79,7 +87,7 @@ fun PatientLoginScreen(onSuccess: (String) -> Unit, onBack: () -> Unit, viewMode
         Text("Use the Username and password provided by your caregiver.", color = TextSecondaryMuted, modifier = Modifier.padding(vertical = 14.dp))
         OutlinedTextField(username, { username = it }, label = { Text("Username") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(Modifier.height(12.dp))
-        OutlinedTextField(password, { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(password, { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth(), singleLine = true, visualTransformation = PasswordVisualTransformation())
         state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
         Button(onClick = { viewModel.login(username, password) }, enabled = username.isNotBlank() && password.isNotBlank() && !state.loading, modifier = Modifier.fillMaxWidth().padding(top = 20.dp).height(56.dp)) { Text("Open my dashboard") }
     }

@@ -2,6 +2,8 @@ package com.nercare.cogcare.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nercare.cogcare.data.local.dao.FamilyMemberDao
 import com.nercare.cogcare.data.local.dao.GameSessionDao
 import com.nercare.cogcare.data.local.dao.LifeMemoryNodeDao
@@ -26,7 +28,7 @@ import com.nercare.cogcare.data.local.entities.ReminderEntity
         LifeMemoryNodeEntity::class,     // Dynamic patient context graph
         FamilyMemberEntity::class        // Family & Friends Memory Gallery
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -42,8 +44,19 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "cogcare_db"
-
-        // NOTE: Replace with a proper Migration(1, 2) object before shipping to production.
-        // Using fallbackToDestructiveMigration during development only.
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE patients ADD COLUMN address TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN bloodGroup TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN allergies TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN primaryDoctor TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN doctorContact TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN mobilityNeeds TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN communicationNeeds TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN dailyRoutine TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE patients ADD COLUMN sleepPattern TEXT NOT NULL DEFAULT ''")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_patients_username ON patients(username)")
+            }
+        }
     }
 }

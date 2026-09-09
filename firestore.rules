@@ -8,6 +8,15 @@ service cloud.firestore {
                                   && resource.data.caregiverId == request.auth.uid;
     }
 
+    match /patient_usernames/{username} {
+      allow create: if request.auth != null
+                    && !exists(/databases/$(database)/documents/patient_usernames/$(username))
+                    && request.resource.data.caregiverId == request.auth.uid;
+      allow read: if request.auth != null;
+      allow delete: if request.auth != null && resource.data.caregiverId == request.auth.uid;
+      allow update: if false;
+    }
+
     match /game_sessions/{sessionId} {
       allow read, write: if request.auth != null;
     }
@@ -20,7 +29,9 @@ service cloud.firestore {
                             && exists(/databases/$(database)/documents/patients/$(patientId))
                             && get(/databases/$(database)/documents/patients/$(patientId)).data.caregiverId == request.auth.uid
                             && request.resource.data.keys().hasOnly(['patientId', 'displayName', 'profileImageUrl', 'interests']);
-      allow delete: if false;
+      allow delete: if request.auth != null
+                    && exists(/databases/$(database)/documents/patients/$(patientId))
+                    && get(/databases/$(database)/documents/patients/$(patientId)).data.caregiverId == request.auth.uid;
     }
   }
 }

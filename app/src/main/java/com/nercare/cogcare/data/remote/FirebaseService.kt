@@ -20,6 +20,7 @@ class FirebaseService @Inject constructor(
         private const val COLLECTION_PATIENTS = "patients"
         private const val COLLECTION_SESSIONS = "game_sessions"
         private const val COLLECTION_SOCIAL_PROFILES = "social_profiles"
+        private const val COLLECTION_USERNAMES = "patient_usernames"
     }
 
     suspend fun syncSocialProfile(profile: SocialProfile) {
@@ -54,6 +55,42 @@ class FirebaseService @Inject constructor(
             Log.e(TAG, "Failed to sync patient: ${e.message}")
             false
         }
+    }
+
+    /** Atomically reserves a normalized username and creates its patient record. */
+    suspend fun createPatient(patient: Patient): Boolean {
+        val normalized = patient.username.trim().lowercase()
+        return try {
+            firestore.runTransaction { transaction ->
+                val usernameRef = firestore.collection(COLLECTION_USERNAMES).document(normalized)
+                if (transaction.get(usernameRef).exists()) {
+                    throw IllegalStateException("Username is already taken")
+                }
+                transaction.set(usernameRef, mapOf("patientId" to patient.id, "caregiverId" to patient.caregiverId))
+                transaction.set(firestore.collection(COLLECTION_PATIENTS).document(patient.id), patient)
+            }.await()
+            true
+        } catch (e: IllegalStateException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create patient: ${e.message}")
+            throw e
+        }
+    }
+
+    suspend fun isUsernameAvailable(username: String): Boolean =
+        !firestore.collection(COLLECTION_USERNAMES).document(username.trim().lowercase()).get().await().exists()
+
+    suspend fun deletePatient(patient: Patient) {
+        val sessions = firestore.collection(COLLECTION_SESSIONS)
+            .whereEqualTo("patientId", patient.id)
+            .get().await()
+        val batch = firestore.batch()
+        batch.delete(firestore.collection(COLLECTION_PATIENTS).document(patient.id))
+        batch.delete(firestore.collection(COLLECTION_SOCIAL_PROFILES).document(patient.id))
+        batch.delete(firestore.collection(COLLECTION_USERNAMES).document(patient.username.trim().lowercase()))
+        sessions.documents.forEach { batch.delete(it.reference) }
+        batch.commit().await()
     }
 
     suspend fun fetchPatientsForCaregiver(caregiverId: String): List<Patient> = try {
