@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +33,7 @@ import com.nercare.cogcare.domain.model.FamilyMember
 import com.nercare.cogcare.domain.model.LifeMemoryNode
 import com.nercare.cogcare.presentation.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoryGalleryScreen(
     patientId: String,
@@ -212,15 +214,40 @@ fun MemoryGalleryScreen(
                         value = newMemberName,
                         onValueChange = { newMemberName = it },
                         label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = newMemberRelation,
-                        onValueChange = { newMemberRelation = it },
-                        label = { Text("Relation (e.g. Son)") },
+                    // Relation dropdown
+                    var relationDropdownExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = relationDropdownExpanded,
+                        onExpandedChange = { relationDropdownExpanded = it },
                         modifier = Modifier.fillMaxWidth()
-                    )
+                    ) {
+                        OutlinedTextField(
+                            value = newMemberRelation.ifBlank { "Select Relation" },
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Relation") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = relationDropdownExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = relationDropdownExpanded,
+                            onDismissRequest = { relationDropdownExpanded = false }
+                        ) {
+                            com.nercare.cogcare.domain.model.FamilyRelation.entries.forEach { rel ->
+                                DropdownMenuItem(
+                                    text = { Text(rel.displayLabel) },
+                                    onClick = {
+                                        newMemberRelation = rel.displayLabel
+                                        relationDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Spacer(Modifier.height(16.dp))
                     OutlinedButton(
                         onClick = { photoPickerLauncher.launch("image/*") },
@@ -235,11 +262,17 @@ fun MemoryGalleryScreen(
             confirmButton = {
                 Button(
                     onClick = { 
-                        Toast.makeText(context, "Member added!", Toast.LENGTH_SHORT).show()
-                        showAddMemberDialog = false
-                        newMemberName = ""
-                        newMemberRelation = ""
-                        newMemberPhotoUri = null
+                        if (newMemberName.isNotBlank()) {
+                            viewModel.addFamilyMember(
+                                fullName = newMemberName,
+                                relationLabel = newMemberRelation,
+                                photoUri = newMemberPhotoUri?.toString()
+                            )
+                            showAddMemberDialog = false
+                            newMemberName = ""
+                            newMemberRelation = ""
+                            newMemberPhotoUri = null
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
                 ) {

@@ -43,4 +43,24 @@ class MemoryGalleryViewModel @Inject constructor(
                 }
         }
     }
+
+    fun addFamilyMember(
+        fullName: String,
+        relationLabel: String,
+        photoUri: String? = null
+    ) {
+        val patientId = loadedPatientId ?: return
+        viewModelScope.launch {
+            val relation = com.nercare.cogcare.domain.model.FamilyRelation.entries
+                .firstOrNull { it.displayLabel.equals(relationLabel.trim(), ignoreCase = true) }
+                ?: com.nercare.cogcare.domain.model.FamilyRelation.OTHER
+            val member = FamilyMember(
+                patientId = patientId,
+                fullName = fullName.trim(),
+                relation = relation,
+                mainPhotoUri = photoUri
+            )
+            lifeStoryRepository.saveFamilyMember(member)
+        }
+    }
 }
