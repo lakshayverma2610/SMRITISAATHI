@@ -61,17 +61,35 @@ class AdaptiveDifficultyEngine @Inject constructor(
 
     private fun loadInterpreter(): Interpreter? {
         return try {
-            val model = loadModelFromAssets(MODEL_ASSET)
             val options = Interpreter.Options().apply {
                 setNumThreads(2)
             }
-            Interpreter(model, options).also {
-                Log.i(TAG, "LiteRT model loaded successfully: $MODEL_ASSET")
+            try {
+                val model = loadModelFromFile(MODEL_ASSET)
+                Interpreter(model, options).also {
+                    Log.i(TAG, "LiteRT model loaded from internal storage: $MODEL_ASSET")
+                }
+            } catch (e: Exception) {
+                val model = loadModelFromAssets(MODEL_ASSET)
+                Interpreter(model, options).also {
+                    Log.i(TAG, "LiteRT model loaded from assets: $MODEL_ASSET")
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "LiteRT model not available, using rule-based fallback: ${e.message}")
             null
         }
+    }
+
+    private fun loadModelFromFile(filename: String): MappedByteBuffer {
+        val file = java.io.File(context.filesDir, filename)
+        if (!file.exists()) throw java.io.FileNotFoundException("Model not found in internal storage")
+        val inputStream = FileInputStream(file)
+        return inputStream.channel.map(
+            FileChannel.MapMode.READ_ONLY,
+            0,
+            file.length()
+        )
     }
 
     private fun loadModelFromAssets(filename: String): MappedByteBuffer {
@@ -125,6 +143,22 @@ class AdaptiveDifficultyEngine @Inject constructor(
             encouragementMessage = message,
             shouldTakeBreak = shouldBreak
         )
+    }
+
+    /**
+     * Legacy helper method for ViewModels that directly pass calculated metrics.
+     */
+    fun recommendDifficulty(
+        avgAccuracy: Float,
+        avgResponseMs: Long,
+        cognitiveStageInt: Int,
+        lastDifficulty: Int
+    ): Int {
+        val stage = CognitiveStage.values().getOrNull(cognitiveStageInt) ?: CognitiveStage.MILD
+        val currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return interpreter
+            ?.let { runLiteRTInference(it, avgAccuracy, avgResponseMs, stage, lastDifficulty, currentHour) }
+            ?: computeRuleBasedLevel(avgAccuracy, avgResponseMs, stage, lastDifficulty, currentHour)
     }
 
     // ─── LiteRT Inference ────────────────────────────────────────────────────

@@ -38,18 +38,24 @@ fun MemoryGalleryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(CogCareBackground)
-            .statusBarsPadding()
     ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(20.dp).padding(top = 16.dp)) {
-            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimaryDark)
+        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Memory Gallery",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Life stories & familiar faces",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextSecondaryMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
-            Text(
-                "Memory Gallery",
-                style = MaterialTheme.typography.titleLarge,
-                color = TextPrimaryDark,
-                modifier = Modifier.align(Alignment.Center)
-            )
         }
 
         when {
@@ -68,7 +74,6 @@ fun MemoryGalleryScreen(
                     item { Spacer(Modifier.height(8.dp)) }
                 }
                 if (uiState.memories.isNotEmpty()) {
-                    item { SectionTitle("Life stories") }
                     items(uiState.memories, key = { "memory-${it.id}-${it.nodeKey}" }) { MemoryCard(it) }
                 }
                 item { Spacer(Modifier.height(72.dp)) }
@@ -103,15 +108,10 @@ private fun MemoryCard(memory: LifeMemoryNode) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             if (!memory.photoUri.isNullOrBlank()) {
                 AsyncImage(model = memory.photoUri, contentDescription = memory.value, modifier = Modifier.size(72.dp).clip(RoundedCornerShape(14.dp)), contentScale = ContentScale.Crop)
-            } else {
-                Surface(modifier = Modifier.size(56.dp), shape = CircleShape, color = SecondaryGreen) {
-                    Box(contentAlignment = Alignment.Center) { Text(domainEmoji(memory.domain), fontSize = 26.sp) }
-                }
             }
             Column(Modifier.weight(1f)) {
-                Text(memory.questionPrompt, style = MaterialTheme.typography.labelLarge, color = TextSecondaryMuted)
-                Spacer(Modifier.height(4.dp))
-                Text(memory.value, style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark, fontWeight = FontWeight.SemiBold)
+                Text(memory.questionPrompt, style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark, fontWeight = FontWeight.Bold)
+                Text(memory.value, style = MaterialTheme.typography.bodyLarge, color = TextSecondaryMuted)
             }
         }
     }

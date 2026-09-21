@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    implementation(libs.sqlcipher)
 
     // WorkManager
     implementation(libs.work.runtime.ktx)
@@ -140,6 +141,15 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+    
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging.interceptor)
+
+    // Vico Charts
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 
     // Coil (image loading)
     implementation(libs.coil.compose)

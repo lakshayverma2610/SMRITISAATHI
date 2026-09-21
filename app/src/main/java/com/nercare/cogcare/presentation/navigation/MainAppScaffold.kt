@@ -80,7 +80,7 @@ fun BottomNavigationBar(
 
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { Text(item.title) },
+                label = { androidx.compose.material3.Text(item.title, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 selected = isSelected,
                 onClick = {
                     navController.navigate(concreteRoute) {

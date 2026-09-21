@@ -8,6 +8,9 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.nercare.cogcare.CogCareApp
 import com.nercare.cogcare.MainActivity
 import com.nercare.cogcare.R
@@ -29,7 +32,18 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
             ReminderType.ACTIVITY
         }
 
+        // 1. Show the standard notification
         showNotification(context, reminderId, patientId, reminderType, title, description, patientName)
+
+        // 2. Trigger Voice Reminder TTS using WorkManager
+        val workData = Data.Builder()
+            .putString("title", title)
+            .putString("patientName", patientName)
+            .build()
+        val voiceWorkRequest = OneTimeWorkRequestBuilder<VoiceReminderWorker>()
+            .setInputData(workData)
+            .build()
+        WorkManager.getInstance(context).enqueue(voiceWorkRequest)
 
         // AlarmManager alarms are one-shot. Re-arm the weekly schedule after firing.
         val repeatDays = intent.getIntegerArrayListExtra(ReminderScheduler.EXTRA_REPEAT_DAYS).orEmpty()

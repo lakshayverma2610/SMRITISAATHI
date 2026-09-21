@@ -6,6 +6,7 @@ import com.nercare.cogcare.ai.AdaptiveDifficultyEngine
 import com.nercare.cogcare.data.repository.GameRepository
 import com.nercare.cogcare.domain.model.GameSession
 import com.nercare.cogcare.domain.model.GameType
+import com.nercare.cogcare.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +15,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+val NER_CARD_DRAWABLES = listOf(
+    R.drawable.ner_hornbill,
+    R.drawable.ner_bamboo,
+    R.drawable.ner_orchid,
+    R.drawable.ner_rhino,
+    R.drawable.ner_mask,
+    R.drawable.ner_drum,
+    R.drawable.ner_hat,
+    R.drawable.ner_tea
+)
+
 data class MemoryCardData(
-    val emoji: String,
+    val drawableRes: Int,
     val pairId: Int
 )
 
@@ -54,9 +66,9 @@ class MemoryCardViewModel @Inject constructor(
         val totalCards = gridSize.first * gridSize.second
         val pairsNeeded = totalCards / 2
 
-        val selectedEmojis = NER_CARD_EMOJIS.shuffled().take(pairsNeeded)
-        val cards = (selectedEmojis + selectedEmojis)
-            .mapIndexed { index, emoji -> MemoryCardData(emoji, selectedEmojis.indexOf(emoji)) }
+        val selectedDrawables = NER_CARD_DRAWABLES.shuffled().take(pairsNeeded)
+        val cards = (selectedDrawables + selectedDrawables)
+            .mapIndexed { index, resId -> MemoryCardData(resId, selectedDrawables.indexOf(resId)) }
             .shuffled()
 
         startTime = System.currentTimeMillis()

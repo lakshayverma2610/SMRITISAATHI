@@ -50,26 +50,28 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundCream)
-            .statusBarsPadding()
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Greeting Header
-        Text(
-            text = "Namaste, ${uiState.patient?.name ?: "Friend"}",
-            style = MaterialTheme.typography.headlineLarge,
-            color = PrimaryGreen,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "What would you like to do today?",
-            style = MaterialTheme.typography.titleMedium,
-            color = TextSecondaryMuted,
-            modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
-        )
+        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Namaste, ${uiState.patient?.name ?: "Friend"}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "What would you like to do today?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextSecondaryMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
 
         // Voice Companion Hero Card
         Card(
@@ -364,60 +366,7 @@ fun HomeScreen(
             onClick = onNavigateToMatching
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Caregiver Dashboard Access with PIN badge
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onNavigateToCaregiverDashboard() }
-                .padding(bottom = 24.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-            border = androidx.compose.foundation.BorderStroke(1.dp, SecondaryGreen)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(44.dp),
-                    shape = CircleShape,
-                    color = SecondaryGreen
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = PrimaryGreen,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Caregiver sign in",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryGreen
-                    )
-                    Text(
-                        text = "A caregiver account is required",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondaryMuted
-                    )
-                }
-
-                Text("🔒", fontSize = 18.sp)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

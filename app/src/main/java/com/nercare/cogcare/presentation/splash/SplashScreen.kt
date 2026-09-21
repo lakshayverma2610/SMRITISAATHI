@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nercare.cogcare.data.repository.CaregiverAuthRepository
 import com.nercare.cogcare.data.repository.SessionRepository
+import com.nercare.cogcare.ai.ModelDownloadManager
 import com.nercare.cogcare.presentation.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,13 +27,15 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
-    private val caregiverAuth: CaregiverAuthRepository
+    private val caregiverAuth: CaregiverAuthRepository,
+    private val modelDownloadManager: ModelDownloadManager
 ) : ViewModel() {
     private val _route = MutableStateFlow<String?>(null)
     val route = _route.asStateFlow()
 
     init {
         viewModelScope.launch {
+            modelDownloadManager.downloadModelIfNeeded()
             val session = sessionRepository.getSession()
             _route.value = when {
                 session?.role == "patient" && !session.patientId.isNullOrBlank() -> Screen.Home.createRoute(session.patientId)

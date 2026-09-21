@@ -16,8 +16,13 @@ class PatientMatchingRepository @Inject constructor(
         val patient = patients.getPatientById(patientId) ?: return emptyList()
         val memories = lifeStory.observeAllMemoryNodes(patientId).first()
         val own = SocialProfile(patient.id, patient.preferredName.ifBlank { patient.name }, patient.profileImageUrl, deriveInterests(patient, memories))
-        firebase.syncSocialProfile(own)
-        val remote = firebase.fetchSocialProfiles()
+        val remote = try {
+            firebase.syncSocialProfile(own)
+            firebase.fetchSocialProfiles()
+        } catch (e: Exception) {
+            android.util.Log.e("PatientMatching", "Firebase fetch failed, falling back to local only", e)
+            emptyList<SocialProfile>()
+        }
         val local = patients.getAllPatientsSync().map { other ->
             SocialProfile(other.id, other.preferredName.ifBlank { other.name }, other.profileImageUrl, deriveInterests(other, emptyList()))
         }

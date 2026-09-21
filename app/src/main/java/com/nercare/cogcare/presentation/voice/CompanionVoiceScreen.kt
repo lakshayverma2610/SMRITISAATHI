@@ -170,7 +170,7 @@ fun CompanionVoiceScreen(
                 .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(64.dp))
 
             // Greeting
             Text(
@@ -730,7 +730,11 @@ private fun VoiceHintChips(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Quick voice commands:", style = MaterialTheme.typography.labelMedium, color = TextSecondaryMuted)
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             val hints = if (onSkip != null) {
                 listOf("\"Yes, correct\"", "\"Skip this\"", "\"I don't know\"")
             } else {

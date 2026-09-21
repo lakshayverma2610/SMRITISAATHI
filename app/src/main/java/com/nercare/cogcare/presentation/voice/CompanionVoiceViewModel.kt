@@ -113,10 +113,11 @@ class CompanionVoiceViewModel @Inject constructor(
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            val result = textToSpeech?.setLanguage(Locale("en", "IN"))
+            // Regional Language Support (Hindi)
+            val result = textToSpeech?.setLanguage(Locale("hi", "IN"))
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                // Fallback if IN is not supported (though usually is)
-                textToSpeech?.setLanguage(Locale.US)
+                // Fallback to English India if Hindi is not installed
+                textToSpeech?.setLanguage(Locale("en", "IN"))
             }
             textToSpeech?.setSpeechRate(0.85f)
             isTtsReady = true

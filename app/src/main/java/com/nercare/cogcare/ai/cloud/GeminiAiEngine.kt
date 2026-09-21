@@ -49,8 +49,8 @@ class GeminiAiEngine @Inject constructor(
                     "intent": "ANSWER_QUESTION",
                     "confidence": 0.95,
                     "extractedMemory": "The concise fact or memory extracted to save",
-                    "assistantResponse": "Warm reaction acknowledging what they shared (max 25 words)",
-                    "generatedFollowUpQuestion": "A curious, friendly follow-up question building directly on what they just said"
+                    "assistantResponse": "Warm reaction acknowledging what they shared (max 25 words). DO NOT use emojis.",
+                    "generatedFollowUpQuestion": "A curious, friendly follow-up question building directly on what they just said. DO NOT use emojis."
                 }
                 """.trimIndent()
             } else {
@@ -69,6 +69,7 @@ class GeminiAiEngine @Inject constructor(
                 - If they ask to set an alarm/reminder, detect the reminder title and time.
                 - If they feel anxious or afraid, provide deep comfort and reassurance.
                 - NEVER ask to save normal chitchat to memory. Just be an endearing companion.
+                - DO NOT use any emojis in your response. Keep it clean text.
                 
                 Return a JSON object:
                 {

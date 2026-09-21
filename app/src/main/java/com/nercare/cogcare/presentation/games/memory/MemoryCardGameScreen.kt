@@ -23,22 +23,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.activity.compose.BackHandler
 import com.nercare.cogcare.presentation.theme.*
 import kotlinx.coroutines.delay
 
-// NER-themed emoji cards (culturally familiar items from Northeast India)
-val NER_CARD_EMOJIS = listOf(
-    "🦅", // Eagle (Hornbill)
-    "🎍", // Bamboo
-    "🌺", // Orchid
-    "🐘", // Elephant (Assam)
-    "🎋", // Bamboo shoots
-    "🦋", // Butterfly
-    "🌿", // Green herb
-    "🏔️", // Mountains
-    "🌸", // Cherry blossom
-    "🦚"  // Peacock
-)
+
+
+import androidx.compose.ui.platform.LocalContext
+import com.nercare.cogcare.presentation.games.RegionalSoundManager
 
 @Composable
 fun MemoryCardGameScreen(
@@ -48,13 +40,40 @@ fun MemoryCardGameScreen(
     viewModel: MemoryCardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showExitDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(patientId, difficulty) {
         viewModel.startGame(patientId, difficulty)
     }
 
+    BackHandler(enabled = !uiState.isGameComplete) {
+        showExitDialog = true
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text("Exit Game?") },
+            text = { Text("Are you sure you want to exit? Your progress will be lost.") },
+            confirmButton = {
+                TextButton(onClick = onGameComplete) {
+                    Text("Yes, Exit", color = ErrorRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text("Cancel", color = TextPrimary)
+                }
+            }
+        )
+    }
+
+    val context = LocalContext.current
+    val soundManager = remember { RegionalSoundManager(context) }
+
     LaunchedEffect(uiState.isGameComplete) {
         if (uiState.isGameComplete) {
+            soundManager.playCulturalSuccessSound()
             delay(2000)
             onGameComplete()
         }
@@ -78,7 +97,7 @@ fun MemoryCardGameScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onGameComplete) {
+                IconButton(onClick = { if (!uiState.isGameComplete) showExitDialog = true else onGameComplete() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -189,11 +208,15 @@ private fun MemoryCard(
         contentAlignment = Alignment.Center
     ) {
         if (isFlipped || isMatched) {
-            Text(
-                text = card.emoji,
-                fontSize = 36.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.graphicsLayer { rotationY = rotation }
+            Image(
+                painter = androidx.compose.ui.res.painterResource(id = card.drawableRes),
+                contentDescription = null,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize(0.8f)
+                    .graphicsLayer { rotationY = rotation }
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(Color.White)
             )
         } else {
             Text(

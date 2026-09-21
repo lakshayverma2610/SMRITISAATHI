@@ -4,18 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.nercare.cogcare.data.local.dao.FamilyMemberDao
-import com.nercare.cogcare.data.local.dao.GameSessionDao
-import com.nercare.cogcare.data.local.dao.LifeMemoryNodeDao
-import com.nercare.cogcare.data.local.dao.PatientDao
-import com.nercare.cogcare.data.local.dao.PatientCredentialDao
-import com.nercare.cogcare.data.local.dao.ReminderDao
-import com.nercare.cogcare.data.local.entities.FamilyMemberEntity
-import com.nercare.cogcare.data.local.entities.GameSessionEntity
-import com.nercare.cogcare.data.local.entities.LifeMemoryNodeEntity
-import com.nercare.cogcare.data.local.entities.PatientEntity
-import com.nercare.cogcare.data.local.entities.PatientCredentialEntity
-import com.nercare.cogcare.data.local.entities.ReminderEntity
+import com.nercare.cogcare.data.local.dao.*
+import com.nercare.cogcare.data.local.entities.*
 
 @Database(
     entities = [
@@ -26,13 +16,13 @@ import com.nercare.cogcare.data.local.entities.ReminderEntity
         ReminderEntity::class,
         // ── Life Story Vault (v2) ─────────────────────────────────
         LifeMemoryNodeEntity::class,     // Dynamic patient context graph
-        FamilyMemberEntity::class        // Family & Friends Memory Gallery
+        FamilyMemberEntity::class,       // Family & Friends Memory Gallery
+        GameContentEntity::class
     ],
     version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-    // ── Existing DAOs ──────────────────────────────────────────────
     abstract fun patientDao(): PatientDao
     abstract fun patientCredentialDao(): PatientCredentialDao
     abstract fun gameSessionDao(): GameSessionDao
@@ -41,6 +31,9 @@ abstract class AppDatabase : RoomDatabase() {
     // ── Life Story Vault DAOs (v2) ─────────────────────────────────
     abstract fun lifeMemoryNodeDao(): LifeMemoryNodeDao
     abstract fun familyMemberDao(): FamilyMemberDao
+
+    // ── Phase 6 ───────────────────────────────────────────────────
+    abstract fun gameContentDao(): GameContentDao
 
     companion object {
         const val DATABASE_NAME = "cogcare_db"

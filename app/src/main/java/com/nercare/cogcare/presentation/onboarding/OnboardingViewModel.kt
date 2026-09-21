@@ -50,7 +50,8 @@ class OnboardingViewModel @Inject constructor(private val patients: PatientRepos
             kotlinx.coroutines.delay(350)
             _usernameError.value = try {
                 if (patients.isUsernameAvailable(normalized)) null else "Username is already taken"
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                android.util.Log.e("Onboarding", "Username check failed: ${e.message}", e)
                 "Could not verify username. Check your connection."
             }
         }

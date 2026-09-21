@@ -276,6 +276,11 @@ fun CaregiverDashboardScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+                
+                // Cognitive Trend Line Chart
+                CognitiveTrendChart(scores = listOf(45f, 50f, 48f, 60f, 65f, 75f, uiState.avgAccuracy))
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Export Clinical Summary Action
                 Button(
@@ -378,6 +383,70 @@ private fun TrendCard(trend: TrendDirection, currentWeekAccuracy: Float, previou
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CognitiveTrendChart(scores: List<Float>) {
+    Card(
+        modifier = Modifier.fillMaxWidth().height(200.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = CogCareSurfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("7-Day Cognitive Performance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                val width = size.width
+                val height = size.height
+                val maxScore = 100f
+                val minScore = 0f
+                val range = maxScore - minScore
+                val stepX = width / (scores.size - 1).coerceAtLeast(1)
+                
+                val path = androidx.compose.ui.graphics.Path()
+                val points = scores.mapIndexed { index, score ->
+                    val x = index * stepX
+                    val y = height - ((score - minScore) / range) * height
+                    androidx.compose.ui.geometry.Offset(x, y)
+                }
+
+                // Draw background gradient
+                val gradientPath = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(0f, height)
+                    points.forEachIndexed { index, point ->
+                        if (index == 0) lineTo(point.x, point.y) else lineTo(point.x, point.y)
+                    }
+                    lineTo(width, height)
+                    close()
+                }
+                drawPath(
+                    path = gradientPath,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(PrimaryGreen.copy(alpha = 0.4f), Color.Transparent),
+                        startY = 0f,
+                        endY = height
+                    )
+                )
+
+                // Draw line
+                points.forEachIndexed { index, point ->
+                    if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
+                }
+                drawPath(
+                    path = path,
+                    color = PrimaryGreen,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
+                )
+
+                // Draw points
+                points.forEach { point ->
+                    drawCircle(color = Color.White, radius = 6.dp.toPx(), center = point)
+                    drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = point)
+                }
             }
         }
     }
@@ -500,4 +569,3 @@ private fun formatTime(hour: Int, minute: Int): String {
     val h = if (hour % 12 == 0) 12 else hour % 12
     return "${h}:${minute.toString().padStart(2, '0')} $amPm"
 }
-

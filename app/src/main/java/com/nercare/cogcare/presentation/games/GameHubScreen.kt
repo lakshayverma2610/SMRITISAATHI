@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,45 +82,38 @@ fun GameHubScreen(
 
     val groupedGames = all15Games.groupBy { it.domain }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundCream)
     ) {
+        // Header
+        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "SmritiSaathi Game Hub",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "15 tailored cognitive exercises for mind & joy",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextSecondaryMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
         androidx.compose.foundation.lazy.LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding(),
-            contentPadding = PaddingValues(20.dp)
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp)
         ) {
             item {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PrimaryGreen)
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = "🎮 SmritiSaathi Game Hub",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryGreen
-                        )
-                        Text(
-                            text = "15 tailored cognitive exercises for mind & joy",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondaryMuted
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // AI Recommendation card
                 uiState.recommendation?.let { rec ->
                     Card(

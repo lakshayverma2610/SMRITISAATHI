@@ -8,10 +8,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.persistentCacheSettings
 import com.nercare.cogcare.data.local.AppDatabase
-import com.nercare.cogcare.data.local.dao.GameSessionDao
-import com.nercare.cogcare.data.local.dao.PatientDao
-import com.nercare.cogcare.data.local.dao.PatientCredentialDao
-import com.nercare.cogcare.data.local.dao.ReminderDao
+import com.nercare.cogcare.data.local.dao.*
+import net.sqlcipher.database.SupportFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,11 +28,15 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        val passphrase = net.sqlcipher.database.SQLiteDatabase.getBytes("super_secret_key_123".toCharArray())
+        val supportFactory = SupportFactory(passphrase)
+
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
+        .openHelperFactory(supportFactory)
         .addMigrations(AppDatabase.MIGRATION_6_7)
         .fallbackToDestructiveMigration()
         .build()
@@ -53,10 +55,13 @@ object AppModule {
     fun provideReminderDao(db: AppDatabase): ReminderDao = db.reminderDao()
 
     @Provides
-    fun provideLifeMemoryNodeDao(db: AppDatabase) = db.lifeMemoryNodeDao()
+    fun provideLifeMemoryNodeDao(db: AppDatabase): LifeMemoryNodeDao = db.lifeMemoryNodeDao()
 
     @Provides
-    fun provideFamilyMemberDao(db: AppDatabase) = db.familyMemberDao()
+    fun provideFamilyMemberDao(db: AppDatabase): FamilyMemberDao = db.familyMemberDao()
+
+    @Provides
+    fun provideGameContentDao(db: AppDatabase): GameContentDao = db.gameContentDao()
 
     @Provides
     @Singleton
@@ -76,6 +81,12 @@ object AppModule {
     @Singleton
     fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
         return WorkManager.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): okhttp3.OkHttpClient {
+        return okhttp3.OkHttpClient.Builder().build()
     }
 
 }

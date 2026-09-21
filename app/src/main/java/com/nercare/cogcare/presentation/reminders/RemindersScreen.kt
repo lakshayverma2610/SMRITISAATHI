@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,13 +44,22 @@ fun RemindersScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 32.dp).padding(top = 16.dp)) {
-                IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
-                }
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
                 Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("⏰ Reminders", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
-                    Text("Your daily schedule", style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
+                    Text(
+                        text = "Reminders",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Your daily schedule",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = TextSecondaryMuted,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
 
@@ -68,7 +78,7 @@ fun RemindersScreen(
                 if (uiState.reminders.isEmpty()) {
                     Box(modifier = Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("⏰", fontSize = 64.sp)
+                            Icon(androidx.compose.material.icons.Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextSecondary)
                             Spacer(modifier = Modifier.height(16.dp))
                             Text("No reminders yet", style = MaterialTheme.typography.titleLarge, color = TextSecondary)
                             Text("Add your first reminder below", style = MaterialTheme.typography.bodyMedium, color = TextDisabled)
@@ -80,7 +90,7 @@ fun RemindersScreen(
                         if (typeReminders.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                "${type.emoji} ${type.displayName}",
+                                type.displayName,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = reminderColor(type)
                             )
@@ -138,7 +148,7 @@ private fun ReminderTypeSummary(reminders: List<Reminder>) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(type.emoji, fontSize = 16.sp)
+                    Text(type.displayName.take(1), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
                     Text("$count", style = MaterialTheme.typography.labelLarge, color = color)
                 }
             }
@@ -169,7 +179,7 @@ private fun ReminderCard(
                     modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)).background(color.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(reminder.type.emoji, fontSize = 24.sp)
+                    Text(reminder.type.displayName.take(1), fontSize = 24.sp, fontWeight = FontWeight.Bold, color = color)
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(reminder.title, style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
