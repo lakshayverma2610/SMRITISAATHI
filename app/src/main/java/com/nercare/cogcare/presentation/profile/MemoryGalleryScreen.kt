@@ -1,32 +1,35 @@
-package com.nercare.cogcare.presentation.profile
+﻿package com.nercare.cogcare.presentation.profile
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.clickable
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.nercare.cogcare.domain.model.FamilyMember
@@ -47,16 +50,34 @@ fun MemoryGalleryScreen(
     var newMemberName by remember { mutableStateOf("") }
     var newMemberRelation by remember { mutableStateOf("") }
     var newMemberPhotoUri by remember { mutableStateOf<android.net.Uri?>(null) }
-    var isRecording by remember { mutableStateOf(false) }
-    
-    val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
         onResult = { uri -> newMemberPhotoUri = uri }
     )
-    
+
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            val member = selectedMember
+            if (granted && member != null) viewModel.startRecording(member)
+        }
+    )
+
     LaunchedEffect(patientId) { viewModel.load(patientId) }
 
+    // Snackbar host
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.snackbarMessage) {
+        val msg = uiState.snackbarMessage
+        if (!msg.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(msg)
+            viewModel.dismissSnackbar()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showAddMemberDialog = true },
@@ -65,7 +86,7 @@ fun MemoryGalleryScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Member")
                 Spacer(Modifier.width(8.dp))
-                Text("Add Member")
+                Text("Add Member", color = Color.White)
             }
         }
     ) { paddingValues ->
@@ -75,119 +96,149 @@ fun MemoryGalleryScreen(
                 .padding(paddingValues)
                 .background(CogCareBackground)
         ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-            Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Memory Gallery",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Life stories & familiar faces",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = TextSecondaryMuted,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+                Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Memory Gallery", style = MaterialTheme.typography.headlineMedium, color = TextPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Text("Life stories & familiar faces", style = MaterialTheme.typography.titleMedium, color = TextSecondaryMuted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                }
             }
-        }
 
-        when {
-            uiState.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryGreen)
-            }
-            uiState.memories.isEmpty() && uiState.familyMembers.isEmpty() -> EmptyGallery()
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (uiState.familyMembers.isNotEmpty()) {
-                    item { SectionTitle("Family & friends") }
-                    items(uiState.familyMembers.chunked(2), key = { "family-chunk-${it.hashCode()}" }) { rowMembers ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            for (member in rowMembers) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    FamilyCard(member = member, onClick = { selectedMember = member })
+            when {
+                uiState.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryGreen)
+                }
+                uiState.memories.isEmpty() && uiState.familyMembers.isEmpty() -> EmptyGallery()
+                else -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (uiState.familyMembers.isNotEmpty()) {
+                        item { SectionTitle("Family & friends") }
+                        items(uiState.familyMembers.chunked(2), key = { "chunk-${it.map { m -> m.id }}" }) { rowMembers ->
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                for (member in rowMembers) {
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        FamilyCard(
+                                            member = member,
+                                            isPlaying = uiState.playingMemberId == member.id,
+                                            playbackState = uiState.voicePlaybackState,
+                                            onClick = { selectedMember = member }
+                                        )
+                                    }
                                 }
-                            }
-                            if (rowMembers.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
+                                if (rowMembers.size == 1) Spacer(modifier = Modifier.weight(1f))
                             }
                         }
+                        item { Spacer(Modifier.height(8.dp)) }
                     }
-                    item { Spacer(Modifier.height(8.dp)) }
+                    if (uiState.memories.isNotEmpty()) {
+                        items(uiState.memories, key = { "memory-${it.id}-${it.nodeKey}" }) { MemoryCard(it) }
+                    }
+                    item { Spacer(Modifier.height(88.dp)) }
                 }
-                if (uiState.memories.isNotEmpty()) {
-                    items(uiState.memories, key = { "memory-${it.id}-${it.nodeKey}" }) { MemoryCard(it) }
-                }
-                item { Spacer(Modifier.height(72.dp)) }
             }
         }
     }
 
-    if (selectedMember != null) {
+    // ── Member Detail Dialog ──────────────────────────────────────────────────
+    val member = selectedMember
+    if (member != null) {
+        val isThisPlaying = uiState.playingMemberId == member.id
+        val isThisRecording = uiState.recordingMemberId == member.id && uiState.recordingState == RecordingState.RECORDING
+        val playbackState = uiState.voicePlaybackState
+
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
+                viewModel.stopPlayback()
                 selectedMember = null
-                isRecording = false
             },
-            title = { Text(selectedMember?.fullName ?: "", color = PrimaryGreen, fontWeight = FontWeight.Bold) },
+            title = { Text(member.fullName, color = PrimaryGreen, fontWeight = FontWeight.Bold) },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    if (!selectedMember?.mainPhotoUri.isNullOrBlank()) {
+                    // Photo
+                    if (!member.mainPhotoUri.isNullOrBlank()) {
                         AsyncImage(
-                            model = selectedMember?.mainPhotoUri,
-                            contentDescription = selectedMember?.fullName,
+                            model = member.mainPhotoUri,
+                            contentDescription = member.fullName,
                             modifier = Modifier.size(100.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(12.dp))
                     }
-                    Text("Relation: ${selectedMember?.relation?.displayLabel}", style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark)
-                    Spacer(Modifier.height(24.dp))
+                    Text("Relation: ${member.relation.displayLabel}", style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark)
+                    if (!member.favouriteSharedMemory.isNullOrBlank()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("\"${member.favouriteSharedMemory}\"", style = MaterialTheme.typography.bodyMedium, color = TextSecondaryMuted, textAlign = TextAlign.Center)
+                    }
+                    Spacer(Modifier.height(20.dp))
+
+                    // Hear Voice Button — real state-driven
                     Button(
-                        onClick = { Toast.makeText(context, "Playing actual voice...", Toast.LENGTH_SHORT).show() },
+                        onClick = { viewModel.toggleVoice(member) },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
+                        enabled = playbackState != VoicePlaybackState.LOADING || isThisPlaying,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isThisPlaying) Color(0xFF388E3C) else PrimaryGreen,
+                            contentColor = Color.White
+                        )
                     ) {
-                        Icon(Icons.Default.PlayArrow, null, tint = Color.White)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Hear Actual Voice", color = Color.White)
+                        when {
+                            isThisPlaying && playbackState == VoicePlaybackState.LOADING -> {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Loading...", color = Color.White)
+                            }
+                            isThisPlaying -> {
+                                Icon(Icons.Default.Stop, null, tint = Color.White)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Stop", color = Color.White)
+                            }
+                            else -> {
+                                Icon(Icons.Default.PlayArrow, null, tint = Color.White)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Hear Voice", color = Color.White)
+                            }
+                        }
                     }
+
                     Spacer(Modifier.height(12.dp))
-                    if (isRecording) {
+
+                    // Record Voice Button — real MediaRecorder
+                    if (isThisRecording) {
                         Button(
-                            onClick = { 
-                                isRecording = false
-                                Toast.makeText(context, "Voice saved!", Toast.LENGTH_SHORT).show() 
-                            },
+                            onClick = { viewModel.stopRecording(member) },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White)
                         ) {
-                            Icon(Icons.Default.Mic, null, tint = Color.White)
+                            Icon(Icons.Default.Stop, null, tint = Color.White)
                             Spacer(Modifier.width(8.dp))
                             Text("Stop Recording", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     } else {
                         OutlinedButton(
-                            onClick = { isRecording = true },
+                            onClick = {
+                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                                    viewModel.startRecording(member)
+                                } else {
+                                    micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen)
                         ) {
                             Icon(Icons.Default.Mic, null, tint = PrimaryGreen)
                             Spacer(Modifier.width(8.dp))
-                            Text("Record New Voice", color = PrimaryGreen)
+                            val hasVoice = !member.voiceNoteUri.isNullOrBlank()
+                            Text(if (hasVoice) "Re-Record Voice" else "Record Voice", color = PrimaryGreen)
                         }
                     }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
+                    viewModel.stopPlayback()
                     selectedMember = null
-                    isRecording = false
                 }) {
                     Text("Close", color = PrimaryGreen, fontWeight = FontWeight.Bold)
                 }
@@ -195,6 +246,7 @@ fun MemoryGalleryScreen(
         )
     }
 
+    // ── Add Member Dialog ─────────────────────────────────────────────────────
     if (showAddMemberDialog) {
         AlertDialog(
             onDismissRequest = { showAddMemberDialog = false },
@@ -213,16 +265,16 @@ fun MemoryGalleryScreen(
                     OutlinedTextField(
                         value = newMemberName,
                         onValueChange = { newMemberName = it },
-                        label = { Text("Name") },
+                        label = { Text("Name *") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        isError = newMemberName.isBlank()
                     )
                     Spacer(Modifier.height(8.dp))
-                    // Relation dropdown
-                    var relationDropdownExpanded by remember { mutableStateOf(false) }
+                    var relationExpanded by remember { mutableStateOf(false) }
                     ExposedDropdownMenuBox(
-                        expanded = relationDropdownExpanded,
-                        onExpandedChange = { relationDropdownExpanded = it },
+                        expanded = relationExpanded,
+                        onExpandedChange = { relationExpanded = it },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
@@ -230,29 +282,20 @@ fun MemoryGalleryScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Relation") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = relationDropdownExpanded) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = relationExpanded) },
                             modifier = Modifier.menuAnchor().fillMaxWidth()
                         )
-                        ExposedDropdownMenu(
-                            expanded = relationDropdownExpanded,
-                            onDismissRequest = { relationDropdownExpanded = false }
-                        ) {
+                        ExposedDropdownMenu(expanded = relationExpanded, onDismissRequest = { relationExpanded = false }) {
                             com.nercare.cogcare.domain.model.FamilyRelation.entries.forEach { rel ->
                                 DropdownMenuItem(
                                     text = { Text(rel.displayLabel) },
-                                    onClick = {
-                                        newMemberRelation = rel.displayLabel
-                                        relationDropdownExpanded = false
-                                    }
+                                    onClick = { newMemberRelation = rel.displayLabel; relationExpanded = false }
                                 )
                             }
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = { photoPickerLauncher.launch("image/*") },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(onClick = { photoPickerLauncher.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
                         Icon(Icons.Default.PhotoLibrary, null, tint = PrimaryGreen)
                         Spacer(Modifier.width(8.dp))
                         Text(if (newMemberPhotoUri == null) "Add Photo" else "Change Photo", color = PrimaryGreen)
@@ -261,44 +304,74 @@ fun MemoryGalleryScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = { 
+                    onClick = {
                         if (newMemberName.isNotBlank()) {
-                            viewModel.addFamilyMember(
-                                fullName = newMemberName,
-                                relationLabel = newMemberRelation,
-                                photoUri = newMemberPhotoUri?.toString()
-                            )
-                            showAddMemberDialog = false
-                            newMemberName = ""
-                            newMemberRelation = ""
-                            newMemberPhotoUri = null
+                            viewModel.addFamilyMember(fullName = newMemberName, relationLabel = newMemberRelation, photoUri = newMemberPhotoUri?.toString())
+                            showAddMemberDialog = false; newMemberName = ""; newMemberRelation = ""; newMemberPhotoUri = null
                         }
                     },
+                    enabled = newMemberName.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
-                ) {
-                    Text("Save", color = Color.White)
-                }
+                ) { Text("Save", color = Color.White) }
             },
             dismissButton = {
                 TextButton(onClick = { showAddMemberDialog = false }) { Text("Cancel", color = PrimaryGreen) }
             }
         )
     }
+}
+
+@Composable
+private fun FamilyCard(
+    member: FamilyMember,
+    isPlaying: Boolean,
+    playbackState: VoicePlaybackState,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = if (isPlaying) PrimaryGreen.copy(alpha = 0.12f) else CogCareSurfaceVariant),
+        border = if (isPlaying) androidx.compose.foundation.BorderStroke(2.dp, PrimaryGreen) else null
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (!member.mainPhotoUri.isNullOrBlank()) {
+                AsyncImage(model = member.mainPhotoUri, contentDescription = member.fullName, modifier = Modifier.size(64.dp).clip(CircleShape), contentScale = ContentScale.Crop)
+            } else {
+                Surface(modifier = Modifier.size(64.dp), shape = CircleShape, color = SecondaryGreen) {
+                    Box(contentAlignment = Alignment.Center) { Text("👤", fontSize = 28.sp) }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(member.fullName, style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(member.relation.displayLabel, style = MaterialTheme.typography.bodySmall, color = TextSecondaryMuted, maxLines = 1)
+            if (isPlaying) {
+                Spacer(Modifier.height(4.dp))
+                if (playbackState == VoicePlaybackState.LOADING) {
+                    CircularProgressIndicator(modifier = Modifier.size(14.dp), color = PrimaryGreen, strokeWidth = 2.dp)
+                } else {
+                    Text("Playing ▶", style = MaterialTheme.typography.labelSmall, color = PrimaryGreen, fontWeight = FontWeight.Bold)
+                }
+            } else if (!member.voiceNoteUri.isNullOrBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text("🎙 Voice saved", style = MaterialTheme.typography.labelSmall, color = PrimaryGreen)
+            }
+        }
     }
 }
 
 @Composable
 private fun EmptyGallery() {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = SecondaryGreen, modifier = Modifier.size(72.dp))
         Spacer(Modifier.height(24.dp))
         Text("Your memories will appear here soon.", style = MaterialTheme.typography.headlineSmall, color = PrimaryGreen, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
-        Text("Answer a Saathi question or ask your caregiver to add details in the Life Story Vault.", style = MaterialTheme.typography.bodyLarge, color = TextSecondaryMuted, textAlign = TextAlign.Center)
+        Text("Add a family member using the + button, or answer a Saathi question.", style = MaterialTheme.typography.bodyLarge, color = TextSecondaryMuted, textAlign = TextAlign.Center)
     }
 }
 
@@ -320,42 +393,4 @@ private fun MemoryCard(memory: LifeMemoryNode) {
             }
         }
     }
-}
-
-@Composable
-private fun FamilyCard(member: FamilyMember, onClick: () -> Unit = {}) {
-    Card(
-        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = CogCareSurfaceVariant)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (!member.mainPhotoUri.isNullOrBlank()) {
-                AsyncImage(model = member.mainPhotoUri, contentDescription = member.fullName, modifier = Modifier.size(64.dp).clip(CircleShape), contentScale = ContentScale.Crop)
-            } else {
-                Surface(modifier = Modifier.size(64.dp), shape = CircleShape, color = SecondaryGreen) {
-                    Box(contentAlignment = Alignment.Center) { Text("👤", fontSize = 28.sp) }
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            Text(member.fullName, style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark, fontWeight = FontWeight.Bold, maxLines = 1)
-            Text(member.relation.displayLabel, style = MaterialTheme.typography.bodyMedium, color = TextSecondaryMuted, maxLines = 1)
-        }
-    }
-}
-
-private fun domainEmoji(domain: String): String = when (domain) {
-    "CULINARY" -> "🍲"
-    "CHILDHOOD" -> "🏡"
-    "CAREER" -> "💼"
-    "ROMANCE" -> "💛"
-    "PARENTHOOD" -> "👪"
-    "SPIRITUAL" -> "🙏"
-    "NER_CULTURE" -> "🎶"
-    "MEDICAL" -> "🩺"
-    else -> "🌿"
 }

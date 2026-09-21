@@ -329,11 +329,11 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SecondaryGreen,
-                            contentColor = PrimaryGreen
+                            contentColor = TextPrimaryDark
                         ),
                         shape = RoundedCornerShape(50)
                     ) {
-                        Text("View all reminders", fontWeight = FontWeight.Bold)
+                        Text("View all reminders", fontWeight = FontWeight.Bold, color = TextPrimaryDark)
                     }
                 }
             }
