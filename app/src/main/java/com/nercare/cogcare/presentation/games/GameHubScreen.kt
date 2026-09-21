@@ -133,11 +133,11 @@ fun GameHubScreen(
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = { onNavigateToGame(rec.nextGame.name, rec.level) },
-                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White),
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("▶  Play ${rec.nextGame.displayName}", fontWeight = FontWeight.Bold)
+                                Text("▶  Play ${rec.nextGame.displayName}", fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }

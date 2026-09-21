@@ -121,7 +121,7 @@ fun HomeScreen(
                     onClick = onNavigateToVoice,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PrimaryGreen,
-                        contentColor = SurfaceWhite
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(50)
                 ) {
@@ -129,7 +129,8 @@ fun HomeScreen(
                         text = "🌿 Tap to speak with Saathi",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
