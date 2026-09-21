@@ -44,7 +44,13 @@ fun MemoryGalleryScreen(
     var showAddMemberDialog by remember { mutableStateOf(false) }
     var newMemberName by remember { mutableStateOf("") }
     var newMemberRelation by remember { mutableStateOf("") }
+    var newMemberPhotoUri by remember { mutableStateOf<android.net.Uri?>(null) }
     var isRecording by remember { mutableStateOf(false) }
+    
+    val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+        onResult = { uri -> newMemberPhotoUri = uri }
+    )
     
     LaunchedEffect(patientId) { viewModel.load(patientId) }
 
@@ -192,7 +198,16 @@ fun MemoryGalleryScreen(
             onDismissRequest = { showAddMemberDialog = false },
             title = { Text("Add Family Member", color = PrimaryGreen, fontWeight = FontWeight.Bold) },
             text = {
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (newMemberPhotoUri != null) {
+                        AsyncImage(
+                            model = newMemberPhotoUri,
+                            contentDescription = "Selected Photo",
+                            modifier = Modifier.size(80.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
                     OutlinedTextField(
                         value = newMemberName,
                         onValueChange = { newMemberName = it },
@@ -208,12 +223,12 @@ fun MemoryGalleryScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     OutlinedButton(
-                        onClick = { Toast.makeText(context, "Select photo from gallery...", Toast.LENGTH_SHORT).show() },
+                        onClick = { photoPickerLauncher.launch("image/*") },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Default.PhotoLibrary, null, tint = PrimaryGreen)
                         Spacer(Modifier.width(8.dp))
-                        Text("Add Photo", color = PrimaryGreen)
+                        Text(if (newMemberPhotoUri == null) "Add Photo" else "Change Photo", color = PrimaryGreen)
                     }
                 }
             },
@@ -224,6 +239,7 @@ fun MemoryGalleryScreen(
                         showAddMemberDialog = false
                         newMemberName = ""
                         newMemberRelation = ""
+                        newMemberPhotoUri = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
                 ) {
