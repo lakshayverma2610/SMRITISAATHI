@@ -431,7 +431,7 @@ private fun TypingContent(
             onClick = onSubmit,
             enabled = value.isNotBlank(),
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White),
             shape = RoundedCornerShape(16.dp)
         ) { Text("Send to Saathi", fontWeight = FontWeight.Bold) }
         TextButton(onClick = onUseMicrophone) {
@@ -530,7 +530,7 @@ private fun RespondingContent(
                 onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
             ) {
                 Icon(Icons.Default.Check, null, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(8.dp))
@@ -570,7 +570,7 @@ private fun RespondingContent(
                 onClick = onSubmitAmendment,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White),
                 enabled = amendText.isNotBlank()
             ) {
                 Text("Save my answer", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -581,7 +581,7 @@ private fun RespondingContent(
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
                 ) { Text("Next Question →", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
             } else {
                 Row(
@@ -592,7 +592,7 @@ private fun RespondingContent(
                         onClick = onTalkAgain,
                         modifier = Modifier.weight(1f).height(56.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
                     ) {
                         Icon(Icons.Default.Mic, null)
                         Spacer(Modifier.width(8.dp))
@@ -645,7 +645,7 @@ private fun CompletedContent(
             onClick = onNext,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
         ) {
             Text("Continue conversation →", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
@@ -694,7 +694,7 @@ private fun NoPendingContent(
             onClick = { if (memoryText.isNotBlank()) onShareMemory(memoryText) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White),
             enabled = memoryText.isNotBlank()
         ) {
             Text("Send to Companion 🌿", fontWeight = FontWeight.Bold, fontSize = 16.sp)

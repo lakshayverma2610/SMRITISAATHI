@@ -9,9 +9,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.clickable
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -32,13 +41,30 @@ fun MemoryGalleryScreen(
     viewModel: MemoryGalleryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    var selectedMember by remember { mutableStateOf<FamilyMember?>(null) }
+    
     LaunchedEffect(patientId) { viewModel.load(patientId) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CogCareBackground)
-    ) {
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { Toast.makeText(context, "Add Family Member opening...", Toast.LENGTH_SHORT).show() },
+                containerColor = PrimaryGreen,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Member")
+                Spacer(Modifier.width(8.dp))
+                Text("Add Member")
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(CogCareBackground)
+        ) {
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
             Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -70,7 +96,9 @@ fun MemoryGalleryScreen(
             ) {
                 if (uiState.familyMembers.isNotEmpty()) {
                     item { SectionTitle("Family & friends") }
-                    items(uiState.familyMembers, key = { "family-${it.id}" }) { FamilyCard(it) }
+                    items(uiState.familyMembers, key = { "family-${it.id}" }) { member -> 
+                        FamilyCard(member = member, onClick = { selectedMember = member }) 
+                    }
                     item { Spacer(Modifier.height(8.dp)) }
                 }
                 if (uiState.memories.isNotEmpty()) {
@@ -79,6 +107,52 @@ fun MemoryGalleryScreen(
                 item { Spacer(Modifier.height(72.dp)) }
             }
         }
+    }
+
+    if (selectedMember != null) {
+        AlertDialog(
+            onDismissRequest = { selectedMember = null },
+            title = { Text(selectedMember?.fullName ?: "", color = PrimaryGreen, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                    if (!selectedMember?.mainPhotoUri.isNullOrBlank()) {
+                        AsyncImage(
+                            model = selectedMember?.mainPhotoUri,
+                            contentDescription = selectedMember?.fullName,
+                            modifier = Modifier.size(100.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    Text("Relation: ${selectedMember?.relation?.displayLabel}", style = MaterialTheme.typography.titleMedium, color = TextPrimaryDark)
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = { Toast.makeText(context, "Playing actual voice...", Toast.LENGTH_SHORT).show() },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color.White)
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Hear Actual Voice")
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = { Toast.makeText(context, "Voice recorder opening...", Toast.LENGTH_SHORT).show() },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen)
+                    ) {
+                        Icon(Icons.Default.Mic, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Record New Voice")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedMember = null }) {
+                    Text("Close", color = PrimaryGreen, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
     }
 }
 
@@ -118,8 +192,12 @@ private fun MemoryCard(memory: LifeMemoryNode) {
 }
 
 @Composable
-private fun FamilyCard(member: FamilyMember) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = CogCareSurfaceVariant)) {
+private fun FamilyCard(member: FamilyMember, onClick: () -> Unit = {}) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = CogCareSurfaceVariant)
+    ) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             if (!member.mainPhotoUri.isNullOrBlank()) {
                 AsyncImage(model = member.mainPhotoUri, contentDescription = member.fullName, modifier = Modifier.size(72.dp).clip(CircleShape), contentScale = ContentScale.Crop)
