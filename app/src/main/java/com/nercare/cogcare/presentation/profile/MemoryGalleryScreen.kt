@@ -154,6 +154,7 @@ fun MemoryGalleryScreen(
             }
         )
     }
+    }
 }
 
 @Composable
