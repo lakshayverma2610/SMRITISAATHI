@@ -4,26 +4,6 @@
 
 SmritiSaathi is a personalized, AI-driven cognitive companion Android application specifically tailored for individuals experiencing memory challenges, early-stage dementia, or cognitive decline. Built with culturally resonant Indian contexts, multilingual voice support via Bhashini, and powered by Google Gemini and on-device Google AI Edge (LiteRT).
 
----
-
-## 📱 App Screenshots
-
-<p align="center">
-  <img src="screenshots/01_home_screen.png" width="23%" alt="Home Screen" />
-  <img src="screenshots/02_home_activities.png" width="23%" alt="Home Activities" />
-  <img src="screenshots/03_game_hub.png" width="23%" alt="Game Hub" />
-  <img src="screenshots/04_memory_gallery.png" width="23%" alt="Memory Gallery" />
-</p>
-
-<p align="center">
-  <img src="screenshots/05_reminders_schedule.png" width="23%" alt="Reminders & Schedule" />
-  <img src="screenshots/06_voice_companion.jpg" width="23%" alt="Voice Companion" />
-  <img src="screenshots/07_memory_cards_game.jpg" width="23%" alt="Memory Cards Game" />
-  <img src="screenshots/08_word_association_game.jpg" width="23%" alt="Word Association Game" />
-</p>
-
----
-
 ## ✨ Key Features
 
 ### 🎙️ 1. Intelligent Multilingual Voice Companion ("Saathi")
@@ -52,13 +32,15 @@ SmritiSaathi is a personalized, AI-driven cognitive companion Android applicatio
 
 ---
 
-## 🚀 Release APK
+## 🚀 Download Release APK
 
-The signed release APK is available directly in this repository:
-- 📦 **[`app-release.apk`](app-release.apk)** (Version 1.0.0)
+The latest signed production release APK is available directly in the [GitHub Releases](https://github.com/lakshayverma2610/SMRITISAATHI/releases/latest) section:
+
+- 📦 **[Download SmritiSaathi v1.0.0 APK](https://github.com/lakshayverma2610/SMRITISAATHI/releases/download/v1.0.0/app-release.apk)**
+- 🏷️ **[View All Releases](https://github.com/lakshayverma2610/SMRITISAATHI/releases)**
 
 ### Quick Install Instructions:
-1. Download **`app-release.apk`** to your Android device (Android 8.0 / API 26+).
+1. Download **`app-release.apk`** from [Releases](https://github.com/lakshayverma2610/SMRITISAATHI/releases/latest) to your Android device (Android 8.0 / API 26+).
 2. Enable *Install from unknown sources* if prompted.
 3. Tap the file to install and open **SmritiSaathi**.
 
